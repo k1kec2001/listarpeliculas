@@ -1,40 +1,70 @@
 import Form from "react-bootstrap/Form";
-import noFoto from "../../../assets/img/noDisponible.png";
-import { useState } from "react";
-
-import { PeliculaGenero } from "../../modelos/PeliculaGenero";
-import { ARREGLO_PELICULA_GENERO } from "../../utilidades/dominios/DomGenero";
-import { useFormulario } from "../../utilidades/misHooks/useFormulario";
-import { Pelicula } from "../../modelos/Pelicula";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { Pelicula } from "../../modelos/Pelicula";
+import noFoto from "../../../assets/img/noDisponible.png";
+import { PeliculaGenero } from "../../modelos/PeliculaGenero";
 import { ARREGLO_PELICULAS } from "../../mocks/Pelicula-mocks";
+import { useFormulario } from "../../utilidades/misHooks/useFormulario";
+import { ConvertirBase64 } from "../../utilidades/funciones/ConvertirBase64";
+import { ARREGLO_PELICULA_GENERO } from "../../utilidades/dominios/DomGenero";
 
 export const PeliCrear = () => {
-  const irsePara= useNavigate();
-  
-  type formHtml=React.FormEvent<HTMLFormElement>;
+  const irsePara = useNavigate();
 
-  const [enProceso, setEnProceso]= useState<boolean>(false);
-  const [imgBase64, setImgBase64]= useState<any>();
-  const [imgMiniatura, setimgMiniatura]=useState<any>(noFoto);
-  const [arrPeliculas]=useState<Pelicula[]>(ARREGLO_PELICULAS);
-  const [arrGenero] = useState<PeliculaGenero[]>(ARREGLO_PELICULA_GENERO);
+  type formHtml = React.FormEvent<HTMLFormElement>;
+  const [enProceso, setEnProceso] = useState<boolean>(false);
+  const [imgBase64, setImgBase64] = useState<any>();
+  const [imgMiniatura, setimgMiniatura] = useState<any>(noFoto);
 
-  let{
+  const [arrPeliculas] = useState<Pelicula[]>(ARREGLO_PELICULAS);
+  const [arrGeneros] = useState<PeliculaGenero[]>(ARREGLO_PELICULA_GENERO);
+
+  let {
     nombrePelicula,
     protagonistaPelicula,
     codGeneroPelicula,
     imagenPelicula,
     dobleEnlace,
     objeto,
-  }=useFormulario<Pelicula>(new Pelicula(0, "","", "","",""));
+  } = useFormulario<Pelicula>(new Pelicula(0, "", "", "", "", ""));
 
-  
+  const enviarForm = (objForm: formHtml) => {
+    objForm.preventDefault();
+    const formulario = objForm.currentTarget;
+
+    if (formulario.checkValidity() === false) {
+      objForm.preventDefault();
+      objForm.stopPropagation();
+      setEnProceso(true);
+    } else {
+      const ultimaPeli = arrPeliculas[arrPeliculas.length - 1];
+      const nuevoCod = ultimaPeli.codPelicula + 1;
+      objeto.codPelicula = nuevoCod;
+      objeto.imagenPelicula = imagenPelicula.substring(
+        imagenPelicula.lastIndexOf("\\") + 1
+      );
+      objeto.imagenPeliculaBase64 = imgBase64;
+      arrPeliculas.push(objeto);
+      setEnProceso(false);
+      irsePara("/plistar");
+    }
+  };
+
+  const cargarImagen = async (e: any) => {
+    const archivos = e.target.files;
+    const imagen = archivos[0];
+    setimgMiniatura(URL.createObjectURL(imagen));
+    dobleEnlace(e);
+    const base64 = await ConvertirBase64(imagen);
+    setImgBase64(base64);
+  };
 
   return (
     <div className="d-flex justify-content-center">
       <div className="col-md-5 mt-5 pb-4">
-        <Form noValidate>
+        <Form noValidate validated={enProceso} onSubmit={enviarForm}>
           <div className="card">
             <div className="card-header">
               <h5 className=" rojito">Formulario creación</h5>
@@ -50,7 +80,9 @@ export const PeliCrear = () => {
                     size="sm"
                     required
                     type="text"
-                    name="nombrePelicula" value={nombrePelicula} onChange={dobleEnlace}
+                    name="nombrePelicula"
+                    value={nombrePelicula}
+                    onChange={dobleEnlace}
                   />
                 </Form.Group>
               </div>
@@ -64,7 +96,9 @@ export const PeliCrear = () => {
                     size="sm"
                     required
                     type="text"
-                    name="protagonistaPelicula" value={protagonistaPelicula} onChange={dobleEnlace}
+                    name="protagonistaPelicula"
+                    value={protagonistaPelicula}
+                    onChange={dobleEnlace}
                   />
                 </Form.Group>
               </div>
@@ -75,9 +109,16 @@ export const PeliCrear = () => {
                     <span className="rojito">*</span> Género
                   </Form.Label>
 
-                  <Form.Select size="sm" required name="codGeneroPelicula" value={codGeneroPelicula} onChange={dobleEnlace} >
+                  <Form.Select
+                    size="sm"
+                    required
+                    name="codGeneroPelicula"
+                    value={codGeneroPelicula}
+                    onChange={dobleEnlace}
+                  >
                     <option value="">Seleccione un genero</option>
-                    {arrGenero.map((miGenero: PeliculaGenero) => (
+
+                    {arrGeneros.map((miGenero: PeliculaGenero) => (
                       <option
                         value={miGenero.codGenero}
                         key={miGenero.codGenero}
@@ -99,6 +140,8 @@ export const PeliCrear = () => {
                     required
                     type="file"
                     name="imagenPelicula"
+                    value={imagenPelicula}
+                    onChange={cargarImagen}
                   />
                 </Form.Group>
               </div>
@@ -106,7 +149,7 @@ export const PeliCrear = () => {
               <div className="mb-3">
                 <div className="d-flex justify-content-center">
                   <img
-                    src={noFoto}
+                    src={imgMiniatura}
                     alt="no foto"
                     className="maximoTamanoCreacion"
                   />

@@ -36,11 +36,12 @@ export const PeliListado = () => {
                   <td>{getNombreGenero(miPeli.codGeneroPelicula)}</td>
                   <td>{miPeli.protagonistaPelicula}</td>
                   <td>
-                    <img src={miPeli.imagenPeliculaBase64} alt="LogoPelicula" className="imagenListado" />
-                    <div className="text-info">
-                      {miPeli.imagenPelicula}
-                    </div>
-                   
+                    <img
+                      src={miPeli.imagenPeliculaBase64}
+                      alt=""
+                      className="imagenListado"
+                    />
+                    <div className="text-info">{miPeli.imagenPelicula}</div>
                   </td>
                 </tr>
               ))}

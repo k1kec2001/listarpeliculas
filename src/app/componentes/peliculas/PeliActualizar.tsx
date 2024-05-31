@@ -34,7 +34,7 @@ export const PeliActualizar = (props: any) => {
               <div className="mb-3">
                 <Form.Group controlId="gen">
                   <Form.Label>
-                    <span className="rojito">*</span> Protagonista
+                    <span className="rojito">*</span> Género
                   </Form.Label>
 
                   <Form.Select size="sm" required name="generoPelicula">
